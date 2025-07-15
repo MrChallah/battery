@@ -1,4 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8">
+<<<<<<< Updated upstream
 <<<<<<< HEAD
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -10,85 +11,99 @@
   <style>
   html, body {
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+  html, body {
+>>>>>>> Stashed changes
     background: transparent !important;
     width: 1920px;
     height: 1080px;
     margin: 0;
     padding: 0;
     overflow: hidden;
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 =======
     position: relative;
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+    position: relative;
+>>>>>>> Stashed changes
   }
   
   .text-shadow {
-    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    text-shadow: 0 0 4px #000, 2px 2px 0 #000;
   }
   
   .battery-container {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 40px;
+    right: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: all 0.3s ease;
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 =======
     z-index: 9999;
     visibility: visible;
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+    z-index: 9999;
+    visibility: visible;
+>>>>>>> Stashed changes
   }
   
   .battery-icon {
     position: relative;
-    width: 40px;
-    height: 20px;
-    border: 2px solid #ffffff;
-    border-radius: 3px;
+    width: 80px;
+    height: 40px;
+    border: 4px solid #ffffff;
+    border-radius: 6px;
     background: linear-gradient(to right, var(--battery-color, #4CAF50) 0%, var(--battery-color, #4CAF50) var(--battery-level, 50%), transparent var(--battery-level, 50%));
-    box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(0 0 2px #000) drop-shadow(1px 1px 0 #000);
+    filter: drop-shadow(0 0 4px #000) drop-shadow(2px 2px 0 #000);
   }
   
   .battery-icon::after {
     content: '';
     position: absolute;
-    right: -6px;
+    right: -12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 4px;
-    height: 8px;
+    width: 8px;
+    height: 16px;
     background: #ffffff;
-    border-radius: 0 2px 2px 0;
-    filter: drop-shadow(0 0 2px #000) drop-shadow(1px 1px 0 #000);
+    border-radius: 0 4px 4px 0;
+    filter: drop-shadow(0 0 4px #000) drop-shadow(2px 2px 0 #000);
   }
   
   .battery-percentage {
-    font-size: 8px;
+    font-size: 16px;
     font-weight: bold;
     color: #ffffff;
-    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    text-shadow: 0 0 4px #000, 2px 2px 0 #000;
     z-index: 10;
     line-height: 1;
   }
   
   .charging-indicator {
-    margin-top: 2px;
-    font-size: 10px;
+    margin-top: 4px;
+    font-size: 20px;
     color: #ffff00;
-    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    text-shadow: 0 0 4px #000, 2px 2px 0 #000;
+    display: none;
     animation: pulse 1.5s infinite;
   }
   
   .charging-indicator.active {
-    opacity: 1;
+    display: block;
   }
   
   @keyframes pulse {
@@ -97,7 +112,7 @@
   }
   
   .battery-icon.charging {
-    box-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
+    box-shadow: 0 0 16px rgba(255, 255, 0, 0.6);
   }
   
   .low-battery {
@@ -118,16 +133,20 @@
     left: 50%;
     transform: translate(-50%, -50%);
     color: #ffffff;
-    font-size: 12px;
+    font-size: 24px;
     text-align: center;
-    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    text-shadow: 0 0 4px #000, 2px 2px 0 #000;
     display: none;
   }
+<<<<<<< Updated upstream
 <<<<<<< HEAD
   </style></head><body class="text-white">
 =======
   </style></head><body>
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+  </style></head><body>
+>>>>>>> Stashed changes
   
   <div id="battery-container" class="battery-container">
     <div id="battery-icon" class="battery-icon high-battery">
@@ -227,6 +246,7 @@
 
     showFallback() {
       console.log('Showing fallback simulation');
+<<<<<<< Updated upstream
 <<<<<<< HEAD
       this.container.style.display = 'none';
       this.fallbackMessage.style.display = 'block';
@@ -238,11 +258,16 @@
         this.startSimulation();
       }, 3000);
 =======
+=======
+>>>>>>> Stashed changes
       // Skip the fallback message and go straight to simulation
       this.container.style.display = 'flex';
       this.fallbackMessage.style.display = 'none';
       this.startSimulation();
+<<<<<<< Updated upstream
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+>>>>>>> Stashed changes
     }
 
     startSimulation() {
@@ -298,9 +323,12 @@
   // Initialize the battery widget when the page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing battery widget');
+<<<<<<< Updated upstream
 <<<<<<< HEAD
     new BatteryWidget();
 =======
+=======
+>>>>>>> Stashed changes
     const widget = new BatteryWidget();
     
     // Ensure widget is visible after a short delay
@@ -312,7 +340,10 @@
         console.log('Force showing battery widget');
       }
     }, 100);
+<<<<<<< Updated upstream
 >>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
+=======
+>>>>>>> Stashed changes
   });
 
   // Handle visibility changes for mobile optimization
