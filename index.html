@@ -154,20 +154,11 @@
     async init() {
       console.log('Battery widget initializing...');
       
-      // Check if we're running in Moblin
-      if (typeof window.moblin !== 'undefined') {
-        console.log('Moblin detected - using Moblin API');
-        this.isMoblin = true;
-        this.setupMoblinBattery();
-        return;
-      }
-      
-      // Also check if URL contains moblin or if we're in an iframe (likely Moblin)
-      if (window.location.href.includes('moblin') || window !== window.top) {
-        console.log('Likely running in Moblin (iframe or URL contains moblin)');
-        this.isMoblin = true;
-        // Force iOS battery API for Moblin since Moblin API might not have battery
-        this.tryNativeBatteryFallback();
+      // Force iOS battery API for all mobile devices - no Moblin API needed
+      if (isMobile || isIOS) {
+        console.log('Mobile/iOS detected - forcing native battery API');
+        this.isMoblin = window !== window.top || typeof window.moblin !== 'undefined';
+        this.forceNativeBattery();
         return;
       }
       
@@ -309,6 +300,76 @@
       }
     }
 
+    async forceNativeBattery() {
+      console.log('Forcing native battery API...');
+      
+      try {
+        if ('getBattery' in navigator) {
+          const battery = await navigator.getBattery();
+          console.log('Battery object:', battery);
+          console.log('Battery level:', battery.level);
+          console.log('Battery charging:', battery.charging);
+          
+          if (battery && typeof battery.level === 'number' && !isNaN(battery.level)) {
+            console.log('Native battery working - setting up real battery monitoring');
+            this.usingRealBattery = true;
+            this.setupBatteryListeners(battery);
+            this.updateBatteryInfo(battery);
+            
+            // Aggressive polling for iOS/Moblin to catch changes immediately
+            this.startAggressivePolling(battery);
+          } else {
+            console.log('Battery object exists but level invalid:', battery.level);
+            this.showFallback();
+          }
+        } else {
+          console.log('getBattery not available');
+          this.showFallback();
+        }
+      } catch (error) {
+        console.error('Native battery error:', error);
+        this.showFallback();
+      }
+    }
+
+    startAggressivePolling(battery) {
+      console.log('Starting aggressive battery polling for mobile...');
+      
+      let lastLevel = Math.round(battery.level * 100);
+      let lastCharging = battery.charging;
+      
+      console.log(`Initial state: ${lastLevel}%, charging: ${lastCharging}`);
+      
+      // Update immediately and frequently for iOS/Moblin
+      const pollBattery = () => {
+        if (!this.usingRealBattery) {
+          console.log('Stopping polling - no longer using real battery');
+          return;
+        }
+        
+        try {
+          const currentLevel = Math.round(battery.level * 100);
+          const currentCharging = battery.charging;
+          
+          // Update if there's any change OR every few polls to ensure consistency
+          if (lastLevel !== currentLevel || lastCharging !== currentCharging) {
+            console.log(`Battery changed: ${lastLevel}%→${currentLevel}%, ${lastCharging}→${currentCharging}`);
+            this.updateBatteryInfo(battery);
+            lastLevel = currentLevel;
+            lastCharging = currentCharging;
+          }
+        } catch (error) {
+          console.error('Polling error:', error);
+        }
+      };
+      
+      // Poll every 1 second for immediate responsiveness
+      setInterval(pollBattery, 1000);
+      
+      // Also poll immediately
+      pollBattery();
+    }
+
     async tryNativeBatteryFallback() {
       console.log('Trying native battery fallback for Moblin...');
       
@@ -402,15 +463,31 @@
 
     showFallback() {
       console.log('Showing fallback simulation');
+      console.log('Setting usingRealBattery to false');
       this.usingRealBattery = false;
+      this.isMoblin = false;
+      
       // Skip the fallback message and go straight to simulation
       this.container.style.display = 'flex';
       this.fallbackMessage.style.display = 'none';
-      this.startSimulation();
+      
+      // Add a small delay to ensure state is set
+      setTimeout(() => {
+        console.log('Starting simulation after fallback');
+        this.startSimulation();
+      }, 100);
     }
 
     startSimulation() {
       console.log('Starting battery simulation');
+      console.log('Real battery status:', this.usingRealBattery);
+      
+      // Don't start simulation if we're using real battery
+      if (this.usingRealBattery) {
+        console.log('Real battery already in use, skipping simulation');
+        return;
+      }
+      
       // Use random starting level for variety
       let simulatedLevel = Math.floor(Math.random() * 80) + 20; // 20-99%
       let simulatedCharging = Math.random() > 0.5; // Random initial charging state
@@ -418,9 +495,9 @@
       console.log(`Simulation starting at ${simulatedLevel}%, charging: ${simulatedCharging}`);
       
       const simulate = () => {
-        // Only run simulation if we're NOT using real battery
+        // Double check - stop simulation if real battery becomes available
         if (this.usingRealBattery) {
-          console.log('Real battery detected, stopping simulation');
+          console.log('Real battery detected during simulation, stopping');
           return;
         }
         
@@ -436,11 +513,19 @@
           }
         }
         
+        console.log(`Simulation update: ${simulatedLevel}%, charging: ${simulatedCharging}`);
         this.updateSimulatedBattery(simulatedLevel, simulatedCharging);
       };
       
       simulate(); // Run immediately
-      setInterval(simulate, 3000); // Slower updates for simulation
+      const simulationInterval = setInterval(() => {
+        if (this.usingRealBattery) {
+          console.log('Clearing simulation interval');
+          clearInterval(simulationInterval);
+          return;
+        }
+        simulate();
+      }, 5000); // Even slower simulation
     }
 
     updateSimulatedBattery(level, isCharging) {
@@ -471,6 +556,13 @@
   // Initialize the battery widget when the page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing battery widget');
+    console.log('Environment check:');
+    console.log('- isMobile:', isMobile);
+    console.log('- isIOS:', isIOS);
+    console.log('- window.moblin exists:', typeof window.moblin !== 'undefined');
+    console.log('- In iframe:', window !== window.top);
+    console.log('- getBattery available:', 'getBattery' in navigator);
+    
     const widget = new BatteryWidget();
     
     // Ensure widget is visible after a short delay
@@ -480,8 +572,10 @@
         container.style.display = 'flex';
         container.style.visibility = 'visible';
         console.log('Force showing battery widget');
+        console.log('Widget state - usingRealBattery:', widget.usingRealBattery);
+        console.log('Widget state - isMoblin:', widget.isMoblin);
       }
-    }, 100);
+    }, 500);
   });
 
   // Handle visibility changes for mobile optimization
@@ -506,19 +600,43 @@
   console.log('Moblin object available:', typeof window.moblin !== 'undefined');
   console.log('Battery API available:', 'getBattery' in navigator);
   
-  // Add debug button for Moblin testing (only visible in browser)
-  if (!isMobile) {
-    setTimeout(() => {
-      const debugDiv = document.createElement('div');
-      debugDiv.style.cssText = 'position:fixed;bottom:10px;left:10px;background:rgba(0,0,0,0.8);color:white;padding:10px;font-size:12px;z-index:10000;';
-      debugDiv.innerHTML = `
-        <div>Moblin: ${typeof window.moblin !== 'undefined'}</div>
-        <div>Battery API: ${'getBattery' in navigator}</div>
-        <div>iOS: ${isIOS}</div>
-        <div>Mobile: ${isMobile}</div>
-      `;
-      document.body.appendChild(debugDiv);
-    }, 1000);
-  }
+  // Add debug info for all environments 
+  setTimeout(() => {
+    const debugDiv = document.createElement('div');
+    debugDiv.style.cssText = 'position:fixed;bottom:10px;left:10px;background:rgba(0,0,0,0.9);color:white;padding:10px;font-size:10px;z-index:10000;border-radius:5px;';
+    debugDiv.innerHTML = `
+      <div><strong>Battery Widget Debug</strong></div>
+      <div>Moblin API: ${typeof window.moblin !== 'undefined'}</div>
+      <div>Battery API: ${'getBattery' in navigator}</div>
+      <div>iOS: ${isIOS}</div>
+      <div>Mobile: ${isMobile}</div>
+      <div>In iframe: ${window !== window.top}</div>
+      <button onclick="window.debugBattery()" style="margin-top:5px;padding:2px 5px;">Test Battery</button>
+      <div id="debug-status">Loading...</div>
+    `;
+    document.body.appendChild(debugDiv);
+    
+    // Add debug function
+    window.debugBattery = async () => {
+      const statusDiv = document.getElementById('debug-status');
+      try {
+        if ('getBattery' in navigator) {
+          const battery = await navigator.getBattery();
+          statusDiv.innerHTML = `
+            <div>Level: ${Math.round(battery.level * 100)}%</div>
+            <div>Charging: ${battery.charging}</div>
+            <div>API Working: ${typeof battery.level === 'number' && !isNaN(battery.level)}</div>
+          `;
+        } else {
+          statusDiv.innerHTML = 'Battery API not available';
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `Error: ${error.message}`;
+      }
+    };
+    
+    // Run debug test immediately
+    window.debugBattery();
+  }, 1000);
   </script>
   </body></html> 
