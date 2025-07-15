@@ -1,288 +1,294 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battery Widget Overlay</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            width: 1920px;
-            height: 1080px;
-            background: transparent;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .battery-widget {
-            position: absolute;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .battery-widget.normal {
-            top: 20px;
-            right: 20px;
-            transform: none;
-        }
-
-        .battery-widget.charging {
-            top: 20px;
-            right: 20px;
-            transform: none;
-        }
-
-        .battery-icon {
-            position: relative;
-            width: 40px;
-            height: 20px;
-            border: 1px solid #ffffff;
-            border-radius: 3px;
-            background: linear-gradient(to right, #4CAF50 0%, #4CAF50 var(--battery-level, 50%), transparent var(--battery-level, 50%));
-            box-shadow: 0 0 7px rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .battery-icon::after {
-            content: '';
-            position: absolute;
-            right: -4px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 8px;
-            background: #ffffff;
-            border-radius: 0 1px 1px 0;
-        }
-
-        .battery-icon.low {
-            border-color: #ff4444;
-            box-shadow: 0 0 7px rgba(255, 68, 68, 0.5);
-            background: linear-gradient(to right, #ff4444 0%, #ff4444 var(--battery-level, 50%), transparent var(--battery-level, 50%));
-        }
-
-        .battery-icon.low::after {
-            background: #ff4444;
-        }
-
-        .battery-icon.medium {
-            border-color: #ffaa00;
-            box-shadow: 0 0 7px rgba(255, 170, 0, 0.5);
-            background: linear-gradient(to right, #ffaa00 0%, #ffaa00 var(--battery-level, 50%), transparent var(--battery-level, 50%));
-        }
-
-        .battery-icon.medium::after {
-            background: #ffaa00;
-        }
-
-        .battery-percentage {
-            font-size: 8px;
-            font-weight: bold;
-            color: #ffffff;
-            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
-            z-index: 10;
-        }
-
-        .charging-indicator {
-            margin-top: 3px;
-            font-size: 11px;
-            color: #ffff00;
-            text-shadow: 0 0 3px rgba(255, 255, 0, 0.8);
-            opacity: 0;
-            transform: translateY(-3px);
-            transition: all 0.3s ease;
-        }
-
-        .charging-indicator.active {
-            opacity: 1;
-            transform: translateY(0);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .battery-icon.charging {
-            animation: chargingGlow 2s infinite;
-        }
-
-        @keyframes chargingGlow {
-            0%, 100% { box-shadow: 0 0 7px rgba(255, 255, 255, 0.5); }
-            50% { box-shadow: 0 0 10px rgba(255, 255, 0, 0.8); }
-        }
-
-        /* Fallback for browsers without Battery API */
-        .fallback-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ffffff;
-            font-size: 6px;
-            text-align: center;
-            opacity: 0.7;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="battery-widget normal" id="batteryWidget">
-        <div class="battery-icon" id="batteryIcon">
-            <div class="battery-percentage" id="batteryPercentage">100%</div>
-        </div>
-        <div class="charging-indicator" id="chargingIndicator">⚡</div>
+<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+  body {
+    background: transparent !important;
+    width: 1920px;
+    height: 1080px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+  }
+  
+  .battery-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .battery-icon {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--battery-color, #4CAF50) 0%, var(--battery-color, #4CAF50) var(--battery-level, 50%), transparent var(--battery-level, 50%));
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 2px #000) drop-shadow(1px 1px 0 #000);
+  }
+  
+  .battery-icon::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 8px;
+    background: #ffffff;
+    border-radius: 0 2px 2px 0;
+    filter: drop-shadow(0 0 2px #000) drop-shadow(1px 1px 0 #000);
+  }
+  
+  .battery-percentage {
+    font-size: 8px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    z-index: 10;
+    line-height: 1;
+  }
+  
+  .charging-indicator {
+    margin-top: 2px;
+    font-size: 10px;
+    color: #ffff00;
+    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .charging-indicator.active {
+    opacity: 1;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  
+  .battery-icon.charging {
+    box-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
+  }
+  
+  .low-battery {
+    --battery-color: #ff4444;
+  }
+  
+  .medium-battery {
+    --battery-color: #ffaa00;
+  }
+  
+  .high-battery {
+    --battery-color: #4CAF50;
+  }
+  
+  .fallback-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 12px;
+    text-align: center;
+    text-shadow: 0 0 2px #000, 1px 1px 0 #000;
+    display: none;
+  }
+  </style></head><body class="text-white">
+  
+  <div id="battery-container" class="battery-container">
+    <div id="battery-icon" class="battery-icon high-battery">
+      <div id="battery-percentage" class="battery-percentage">100%</div>
     </div>
-
-    <div class="fallback-message" id="fallbackMessage">
-        Battery API not supported<br>
-        Please use on mobile device
+    <div id="charging-indicator" class="charging-indicator">
+      <i class="fa-solid fa-bolt"></i>
     </div>
+  </div>
 
-    <script>
-        class BatteryWidget {
-            constructor() {
-                this.widget = document.getElementById('batteryWidget');
-                this.icon = document.getElementById('batteryIcon');
-                this.percentage = document.getElementById('batteryPercentage');
-                this.chargingIndicator = document.getElementById('chargingIndicator');
-                this.fallbackMessage = document.getElementById('fallbackMessage');
-                
-                this.init();
-            }
+  <div id="fallback-message" class="fallback-message">
+    Battery API not supported<br>
+    Please use on mobile device
+  </div>
 
-            async init() {
-                try {
-                    // Try to get battery API
-                    if ('getBattery' in navigator) {
-                        const battery = await navigator.getBattery();
-                        this.setupBatteryListeners(battery);
-                        this.updateBatteryInfo(battery);
-                    } else {
-                        // Fallback for browsers without Battery API
-                        this.showFallback();
-                    }
-                } catch (error) {
-                    console.error('Battery API error:', error);
-                    this.showFallback();
-                }
-            }
+  <script>
+  // Detect if we're on mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  class BatteryWidget {
+    constructor() {
+      this.container = document.getElementById('battery-container');
+      this.icon = document.getElementById('battery-icon');
+      this.percentage = document.getElementById('battery-percentage');
+      this.chargingIndicator = document.getElementById('charging-indicator');
+      this.fallbackMessage = document.getElementById('fallback-message');
+      
+      this.init();
+    }
 
-            setupBatteryListeners(battery) {
-                battery.addEventListener('levelchange', () => this.updateBatteryInfo(battery));
-                battery.addEventListener('chargingchange', () => this.updateBatteryInfo(battery));
-                battery.addEventListener('chargingtimechange', () => this.updateBatteryInfo(battery));
-                battery.addEventListener('dischargingtimechange', () => this.updateBatteryInfo(battery));
-            }
-
-            updateBatteryInfo(battery) {
-                const level = Math.round(battery.level * 100);
-                const isCharging = battery.charging;
-
-                // Update percentage
-                this.percentage.textContent = `${level}%`;
-
-                // Update battery level CSS variable
-                this.icon.style.setProperty('--battery-level', `${level}%`);
-
-                // Update battery color based on level
-                this.icon.className = 'battery-icon';
-                if (level <= 20) {
-                    this.icon.classList.add('low');
-                } else if (level <= 50) {
-                    this.icon.classList.add('medium');
-                }
-
-                // Handle charging state
-                if (isCharging) {
-                    this.widget.className = 'battery-widget charging';
-                    this.icon.classList.add('charging');
-                    this.chargingIndicator.classList.add('active');
-                } else {
-                    this.widget.className = 'battery-widget normal';
-                    this.icon.classList.remove('charging');
-                    this.chargingIndicator.classList.remove('active');
-                }
-            }
-
-            showFallback() {
-                this.widget.style.display = 'none';
-                this.fallbackMessage.style.display = 'block';
-                
-                // Simulate battery for demo purposes
-                let simulatedLevel = 75;
-                let simulatedCharging = false;
-                
-                setInterval(() => {
-                    if (simulatedCharging) {
-                        simulatedLevel = Math.min(100, simulatedLevel + 1);
-                        if (simulatedLevel >= 100) {
-                            simulatedCharging = false;
-                        }
-                    } else {
-                        simulatedLevel = Math.max(0, simulatedLevel - 1);
-                        if (simulatedLevel <= 20) {
-                            simulatedCharging = true;
-                        }
-                    }
-                    
-                    this.updateSimulatedBattery(simulatedLevel, simulatedCharging);
-                }, 2000);
-            }
-
-            updateSimulatedBattery(level, isCharging) {
-                this.widget.style.display = 'flex';
-                this.fallbackMessage.style.display = 'none';
-                
-                this.percentage.textContent = `${level}%`;
-                this.icon.style.setProperty('--battery-level', `${level}%`);
-
-                this.icon.className = 'battery-icon';
-                if (level <= 20) {
-                    this.icon.classList.add('low');
-                } else if (level <= 50) {
-                    this.icon.classList.add('medium');
-                }
-
-                if (isCharging) {
-                    this.widget.className = 'battery-widget charging';
-                    this.icon.classList.add('charging');
-                    this.chargingIndicator.classList.add('active');
-                } else {
-                    this.widget.className = 'battery-widget normal';
-                    this.icon.classList.remove('charging');
-                    this.chargingIndicator.classList.remove('active');
-                }
-            }
+    async init() {
+      console.log('Battery widget initializing...');
+      
+      try {
+        // Try to get battery API
+        if ('getBattery' in navigator) {
+          console.log('Battery API available');
+          const battery = await navigator.getBattery();
+          this.setupBatteryListeners(battery);
+          this.updateBatteryInfo(battery);
+        } else {
+          console.log('Battery API not available, showing fallback');
+          this.showFallback();
         }
+      } catch (error) {
+        console.error('Battery API error:', error);
+        this.showFallback();
+      }
+    }
 
-        // Initialize the battery widget when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new BatteryWidget();
-        });
+    setupBatteryListeners(battery) {
+      console.log('Setting up battery listeners');
+      battery.addEventListener('levelchange', () => {
+        console.log('Battery level changed:', battery.level);
+        this.updateBatteryInfo(battery);
+      });
+      battery.addEventListener('chargingchange', () => {
+        console.log('Charging state changed:', battery.charging);
+        this.updateBatteryInfo(battery);
+      });
+      battery.addEventListener('chargingtimechange', () => this.updateBatteryInfo(battery));
+      battery.addEventListener('dischargingtimechange', () => this.updateBatteryInfo(battery));
+    }
 
-        // Handle visibility changes for mobile optimization
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // Pause updates when hidden
-                console.log('Widget hidden, pausing updates');
-            } else {
-                // Resume updates when visible
-                console.log('Widget visible, resuming updates');
-            }
-        });
-    </script>
-</body>
-</html> 
+    updateBatteryInfo(battery) {
+      const level = Math.round(battery.level * 100);
+      const isCharging = battery.charging;
+      
+      console.log(`Battery: ${level}%, Charging: ${isCharging}`);
+
+      // Update percentage
+      this.percentage.textContent = `${level}%`;
+
+      // Update battery level CSS variable
+      this.icon.style.setProperty('--battery-level', `${level}%`);
+
+      // Update battery color based on level
+      this.icon.className = 'battery-icon';
+      if (level <= 20) {
+        this.icon.classList.add('low-battery');
+      } else if (level <= 50) {
+        this.icon.classList.add('medium-battery');
+      } else {
+        this.icon.classList.add('high-battery');
+      }
+
+      // Handle charging state
+      if (isCharging) {
+        this.icon.classList.add('charging');
+        this.chargingIndicator.classList.add('active');
+      } else {
+        this.icon.classList.remove('charging');
+        this.chargingIndicator.classList.remove('active');
+      }
+    }
+
+    showFallback() {
+      console.log('Showing fallback simulation');
+      this.container.style.display = 'none';
+      this.fallbackMessage.style.display = 'block';
+      
+      // Show fallback message briefly, then start simulation
+      setTimeout(() => {
+        this.container.style.display = 'flex';
+        this.fallbackMessage.style.display = 'none';
+        this.startSimulation();
+      }, 3000);
+    }
+
+    startSimulation() {
+      console.log('Starting battery simulation');
+      let simulatedLevel = 75;
+      let simulatedCharging = false;
+      
+      const simulate = () => {
+        if (simulatedCharging) {
+          simulatedLevel = Math.min(100, simulatedLevel + 1);
+          if (simulatedLevel >= 100) {
+            simulatedCharging = false;
+          }
+        } else {
+          simulatedLevel = Math.max(0, simulatedLevel - 1);
+          if (simulatedLevel <= 20) {
+            simulatedCharging = true;
+          }
+        }
+        
+        this.updateSimulatedBattery(simulatedLevel, simulatedCharging);
+      };
+      
+      simulate(); // Run immediately
+      setInterval(simulate, 2000);
+    }
+
+    updateSimulatedBattery(level, isCharging) {
+      console.log(`Simulated Battery: ${level}%, Charging: ${isCharging}`);
+      
+      this.percentage.textContent = `${level}%`;
+      this.icon.style.setProperty('--battery-level', `${level}%`);
+
+      this.icon.className = 'battery-icon';
+      if (level <= 20) {
+        this.icon.classList.add('low-battery');
+      } else if (level <= 50) {
+        this.icon.classList.add('medium-battery');
+      } else {
+        this.icon.classList.add('high-battery');
+      }
+
+      if (isCharging) {
+        this.icon.classList.add('charging');
+        this.chargingIndicator.classList.add('active');
+      } else {
+        this.icon.classList.remove('charging');
+        this.chargingIndicator.classList.remove('active');
+      }
+    }
+  }
+
+  // Initialize the battery widget when the page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing battery widget');
+    new BatteryWidget();
+  });
+
+  // Handle visibility changes for mobile optimization
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      console.log('Widget hidden, pausing updates');
+    } else {
+      console.log('Widget visible, resuming updates');
+    }
+  });
+  
+  // Debug info for mobile
+  if (isMobile) {
+    console.log('Running on mobile device');
+  }
+  if (isIOS) {
+    console.log('Running on iOS device');
+  }
+  </script>
+  </body></html> 
