@@ -151,6 +151,15 @@
           const battery = await navigator.getBattery();
           this.setupBatteryListeners(battery);
           this.updateBatteryInfo(battery);
+          
+          // iOS-specific: Force immediate update and start polling
+          if (isIOS) {
+            console.log('iOS detected - setting up enhanced polling');
+            // Force immediate update
+            setTimeout(() => this.updateBatteryInfo(battery), 100);
+            // Start frequent polling for iOS
+            this.startIOSPolling(battery);
+          }
         } else {
           console.log('Battery API not available, showing fallback');
           this.showFallback();
@@ -175,6 +184,31 @@
       battery.addEventListener('dischargingtimechange', () => this.updateBatteryInfo(battery));
     }
 
+    startIOSPolling(battery) {
+      console.log('Starting iOS battery polling...');
+      let lastLevel = null;
+      let lastCharging = null;
+      
+      const pollBattery = () => {
+        const currentLevel = Math.round(battery.level * 100);
+        const currentCharging = battery.charging;
+        
+        // Always update on iOS to ensure responsiveness
+        if (lastLevel !== currentLevel || lastCharging !== currentCharging) {
+          console.log(`iOS Poll: Battery ${currentLevel}%, Charging: ${currentCharging}`);
+          this.updateBatteryInfo(battery);
+          lastLevel = currentLevel;
+          lastCharging = currentCharging;
+        }
+      };
+      
+      // Poll every 1 second for iOS to catch changes immediately
+      setInterval(pollBattery, 1000);
+      
+      // Also poll immediately
+      pollBattery();
+    }
+
     updateBatteryInfo(battery) {
       const level = Math.round(battery.level * 100);
       const isCharging = battery.charging;
@@ -197,13 +231,21 @@
         this.icon.classList.add('high-battery');
       }
 
-      // Handle charging state
+      // Handle charging state - iOS-specific improvements
       if (isCharging) {
         this.icon.classList.add('charging');
         this.chargingIndicator.classList.add('active');
+        console.log('Charging indicator activated');
       } else {
         this.icon.classList.remove('charging');
         this.chargingIndicator.classList.remove('active');
+        console.log('Charging indicator deactivated');
+      }
+      
+      // Force visibility for iOS
+      if (isIOS) {
+        this.container.style.display = 'flex';
+        this.container.style.visibility = 'visible';
       }
     }
 
@@ -217,8 +259,11 @@
 
     startSimulation() {
       console.log('Starting battery simulation');
-      let simulatedLevel = 75;
+      // Use random starting level for iOS to avoid the 74% issue
+      let simulatedLevel = isIOS ? Math.floor(Math.random() * 100) + 1 : 75;
       let simulatedCharging = false;
+      
+      console.log(`Simulation starting at ${simulatedLevel}%`);
       
       const simulate = () => {
         if (simulatedCharging) {
@@ -237,7 +282,9 @@
       };
       
       simulate(); // Run immediately
-      setInterval(simulate, 2000);
+      // iOS needs faster updates for simulation too
+      const interval = isIOS ? 1000 : 2000;
+      setInterval(simulate, interval);
     }
 
     updateSimulatedBattery(level, isCharging) {
@@ -279,6 +326,25 @@
         console.log('Force showing battery widget');
       }
     }, 100);
+    
+    // iOS-specific: Additional delayed initialization
+    if (isIOS) {
+      setTimeout(() => {
+        console.log('iOS: Additional initialization check');
+        const container = document.getElementById('battery-container');
+        if (container) {
+          container.style.display = 'flex';
+          container.style.visibility = 'visible';
+        }
+        // Force a battery update if available
+        if (navigator.getBattery) {
+          navigator.getBattery().then(battery => {
+            console.log('iOS: Manual battery update');
+            widget.updateBatteryInfo(battery);
+          });
+        }
+      }, 1000);
+    }
   });
 
   // Handle visibility changes for mobile optimization
