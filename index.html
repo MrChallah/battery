@@ -1,14 +1,25 @@
 <!DOCTYPE html><html><head><meta charset="utf-8">
+<<<<<<< HEAD
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
   body {
+=======
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+  html, body {
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
     background: transparent !important;
     width: 1920px;
     height: 1080px;
     margin: 0;
     padding: 0;
     overflow: hidden;
+<<<<<<< HEAD
+=======
+    position: relative;
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
   }
   
   .text-shadow {
@@ -23,6 +34,11 @@
     flex-direction: column;
     align-items: center;
     transition: all 0.3s ease;
+<<<<<<< HEAD
+=======
+    z-index: 9999;
+    visibility: visible;
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
   }
   
   .battery-icon {
@@ -107,7 +123,11 @@
     text-shadow: 0 0 2px #000, 1px 1px 0 #000;
     display: none;
   }
+<<<<<<< HEAD
   </style></head><body class="text-white">
+=======
+  </style></head><body>
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
   
   <div id="battery-container" class="battery-container">
     <div id="battery-icon" class="battery-icon high-battery">
@@ -207,6 +227,7 @@
 
     showFallback() {
       console.log('Showing fallback simulation');
+<<<<<<< HEAD
       this.container.style.display = 'none';
       this.fallbackMessage.style.display = 'block';
       
@@ -216,6 +237,12 @@
         this.fallbackMessage.style.display = 'none';
         this.startSimulation();
       }, 3000);
+=======
+      // Skip the fallback message and go straight to simulation
+      this.container.style.display = 'flex';
+      this.fallbackMessage.style.display = 'none';
+      this.startSimulation();
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
     }
 
     startSimulation() {
@@ -271,7 +298,21 @@
   // Initialize the battery widget when the page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing battery widget');
+<<<<<<< HEAD
     new BatteryWidget();
+=======
+    const widget = new BatteryWidget();
+    
+    // Ensure widget is visible after a short delay
+    setTimeout(() => {
+      const container = document.getElementById('battery-container');
+      if (container) {
+        container.style.display = 'flex';
+        container.style.visibility = 'visible';
+        console.log('Force showing battery widget');
+      }
+    }, 100);
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
   });
 
   // Handle visibility changes for mobile optimization
@@ -291,4 +332,8 @@
     console.log('Running on iOS device');
   }
   </script>
+<<<<<<< HEAD
   </body></html> 
+=======
+  </body></html> 
+>>>>>>> 6c1bdbada611ef5edb0a32820cc7ce42ab0b8c0b
